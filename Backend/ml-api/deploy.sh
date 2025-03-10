@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Install dependencies
-pip install -r requirement.txt
-
 # Train the model
 python finance_model.py
 
