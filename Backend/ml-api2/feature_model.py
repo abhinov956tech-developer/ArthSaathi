@@ -1,44 +1,54 @@
-import pandas as pd
 import joblib
-from feature_engineering import (
-    calculate_interaction_features,
-    calculate_risk_adjusted_returns,
-    encode_categorical_features,
-)
-from data_preprocessing import clean_data, preprocess_data
+import os
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
 
-# 1. Regenerate engineered data with all features
-raw_data = pd.read_csv("satej/mutual_fund_data.csv")
-engineered_data = clean_data(raw_data)
-engineered_data = preprocess_data(engineered_data)
-engineered_data = calculate_interaction_features(engineered_data)
-engineered_data = calculate_risk_adjusted_returns(engineered_data)
-engineered_data = encode_categorical_features(engineered_data)
+def train_linear_regression(X_train, y_train):
+    """
+    Train a Linear Regression model.
+    """
+    model = LinearRegression()
+    model.fit(X_train, y_train)
+    return model
 
-# 2. Load model and required features
-model = joblib.load("satej/models/linear_regression.pkl")
-expected_features = joblib.load("satej/models/feature_columns.pkl")
+if __name__ == "__main__":
+    # Load engineered data
+    input_file = "satej/engineered_mutual_fund_data.csv"
+    data = pd.read_csv(input_file)
 
-# 3. Verify/repair features
-missing = set(expected_features) - set(engineered_data.columns)
-if missing:
-    print(f"Adding missing features: {missing}")
-    engineered_data = engineered_data.assign(
-        **{feature: 0 for feature in missing}  # Initialize missing features
-    )
-    # Calculate interaction features
-    engineered_data["expense_ratio_x_fund_size"] = (
-        engineered_data["expense_ratio"] * engineered_data["fund_size_cr"]
-    )
-    engineered_data["fund_age_x_returns_1yr"] = (
-        engineered_data["fund_age_yr"] * engineered_data["returns_1yr"]
-    )
+    # Define features and target variable
+    target_column = "returns_1yr"
+    features = [
+        col
+        for col in data.columns
+        if col
+        not in [
+            target_column,
+            "scheme_name",
+            "fund_manager",
+            "amc_name",
+            "category",
+            "sub_category",
+        ]
+    ]
 
-# 4. Prepare prediction data
-X_existing = engineered_data[expected_features].fillna(0)  # Handle NaNs
+    # Prepare data
+    X = data[features].dropna()
+    y = data[target_column][X.index]
 
-# 5. Make predictions
-engineered_data["predicted_1yr_return"] = model.predict(X_existing)
+    # Split data into training and testing sets
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# 6. Save results
-engineered_data.to_csv("satej/predictions_with_all_features.csv", index=False)
+    # Train the model
+    print("Training Linear Regression model...")
+    lr_model = train_linear_regression(X_train, y_train)
+
+    # Save the model
+    model_save_path = "satej/models/"
+    os.makedirs(model_save_path, exist_ok=True)
+    joblib.dump(lr_model, os.path.join(model_save_path, "linear_regression.pkl"))
+
+    # Save the list of feature names
+    joblib.dump(features, os.path.join(model_save_path, "feature_columns.pkl"))
+    print(f"Model and feature list saved to {model_save_path}")
