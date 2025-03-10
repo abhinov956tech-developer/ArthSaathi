@@ -32,5 +32,8 @@ RUN pip install --no-cache-dir \
     shap==0.44.0 \
     seaborn==0.12.2  # Added Seaborn here
 
+# Debugging: List files to verify deploy.sh is copied
+RUN ls -l
+
 # Run the deployment script
 RUN chmod +x deploy.sh && ./deploy.sh

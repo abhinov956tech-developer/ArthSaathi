@@ -805,4 +805,4 @@ const communities = [
   }
 ];
 
-export default temp1;
+export default Learn;
