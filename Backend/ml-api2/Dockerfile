@@ -32,5 +32,13 @@ RUN pip install --no-cache-dir \
     shap==0.44.0 \
     seaborn==0.12.2  # Added Seaborn here
 
-# Run the deployment script
-RUN chmod +x deploy.sh && ./deploy.sh
+# Run the deployment steps directly in the Dockerfile
+RUN python data_preprocessing.py && \
+    python feature_engineering.py && \
+    python automation_pipeline.py && \
+    python model_training.py && \
+    python automation_pipeline.py && \
+    python feature_model.py
+
+# Start FastAPI server
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
