@@ -83,5 +83,8 @@ RUN python data_preprocessing.py && \
     python automation_pipeline.py && \
     python feature_model.py
 
-# Start FastAPI server
-RUN python main.py
+# Expose the port the app runs on
+EXPOSE 5000
+
+# Set the command to run the Flask app using gunicorn
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "main:app"]
