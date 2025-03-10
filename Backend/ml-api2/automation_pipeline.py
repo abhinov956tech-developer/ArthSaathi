@@ -1,3 +1,10 @@
+"""
+automation_pipeline.py
+
+This module automates the entire pipeline, including data updates, model retraining, and dashboard refresh.
+Author: Satej
+"""
+
 import os
 import pandas as pd
 from data_preprocessing import load_data, clean_data, preprocess_data

@@ -1,16 +1,42 @@
+"""
+data_preprocessing.py
+
+This module handles the data collection, cleaning, and preprocessing steps for mutual fund analysis.
+Author: Satej
+"""
+
 import pandas as pd
 import numpy as np
 import os
 from sklearn.preprocessing import StandardScaler
 
 def load_data(file_path):
-       if not os.path.exists(file_path):
+    """
+    Load data from a CSV file.
+
+    Args:
+        file_path (str): Path to the dataset file.
+
+    Returns:
+        pd.DataFrame: Loaded dataset as a Pandas DataFrame.
+    """
+    if not os.path.exists(file_path):
         raise FileNotFoundError(f"File not found: {file_path}")
     return pd.read_csv(file_path)
 
 
 def clean_data(df):
-       missing_summary = df.isnull().sum()
+    """
+    Clean the data by handling missing values and ensuring consistency.
+
+    Args:
+        df (pd.DataFrame): Raw dataset.
+
+    Returns:
+        pd.DataFrame: Cleaned dataset.
+    """
+    # Check for missing values
+    missing_summary = df.isnull().sum()
     print(f"Missing Values Summary:\n{missing_summary}")
 
     # Drop rows with missing 'scheme_name'
@@ -34,7 +60,18 @@ def clean_data(df):
 
 
 def preprocess_data(df):
-   categorical_columns = ['risk_level', 'rating']
+    """
+    Perform additional preprocessing steps, such as encoding categorical variables
+    and scaling numerical features.
+
+    Args:
+        df (pd.DataFrame): Cleaned dataset.
+
+    Returns:
+        pd.DataFrame: Preprocessed dataset.
+    """
+    # Encode categorical variables using one-hot encoding (excluding 'scheme_name', 'fund_manager', 'amc_name', 'category', and 'sub_category')
+    categorical_columns = ['risk_level', 'rating']
     df = pd.get_dummies(df, columns=categorical_columns, drop_first=True)
 
     # Scale numerical features
@@ -47,7 +84,15 @@ def preprocess_data(df):
 
 
 def save_cleaned_data(df, output_path):
-   required_columns = ['scheme_name', 'fund_manager', 'amc_name', 'category', 'sub_category']
+    """
+    Save the cleaned dataset to a CSV file.
+
+    Args:
+        df (pd.DataFrame): Cleaned and preprocessed dataset.
+        output_path (str): Path to save the processed data.
+    """
+    # Ensure required columns are included in the output
+    required_columns = ['scheme_name', 'fund_manager', 'amc_name', 'category', 'sub_category']
     for col in required_columns:
         if col not in df.columns:
             raise ValueError(f"'{col}' column is missing in the DataFrame.")

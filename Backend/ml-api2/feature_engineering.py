@@ -1,8 +1,25 @@
+"""
+feature_engineering.py
+
+This module performs feature engineering to enhance the predictive accuracy of mutual fund forecasting models.
+Author: Satej
+"""
+
 import pandas as pd
 import numpy as np
 
 def calculate_interaction_features(df):
-   if 'expense_ratio' in df.columns and 'fund_size_cr' in df.columns:
+    """
+    Create interaction features by combining existing numerical columns.
+
+    Args:
+        df (pd.DataFrame): Preprocessed dataset.
+
+    Returns:
+        pd.DataFrame: Dataset with new interaction feature columns added.
+    """
+    # Example: Create interaction between expense_ratio and fund_size_cr
+    if 'expense_ratio' in df.columns and 'fund_size_cr' in df.columns:
         df['expense_ratio_x_fund_size'] = df['expense_ratio'] * df['fund_size_cr']
 
     # Example: Create interaction between fund_age_yr and returns_1yr
@@ -13,8 +30,19 @@ def calculate_interaction_features(df):
 
 
 def calculate_risk_adjusted_returns(df):
+    """
+    Calculate risk-adjusted returns using Sharpe ratio and Sortino ratio.
+
+    Args:
+        df (pd.DataFrame): Preprocessed dataset.
+
+    Returns:
+        pd.DataFrame: Dataset with new risk-adjusted return columns added.
+    """
+    # Risk-free rate assumption
     risk_free_rate = 0.02
 
+    # Calculate Sharpe ratio
     if 'returns_1yr' in df.columns and 'sd' in df.columns:
         df['sharpe_ratio'] = (df['returns_1yr'] - risk_free_rate) / df['sd']
 
@@ -26,7 +54,17 @@ def calculate_risk_adjusted_returns(df):
 
 
 def calculate_performance_metrics(df):
-   if 'alpha' in df.columns and 'sd' in df.columns:
+    """
+    Calculate additional performance metrics such as alpha and beta.
+
+    Args:
+        df (pd.DataFrame): Preprocessed dataset.
+
+    Returns:
+        pd.DataFrame: Dataset with new performance metric columns added.
+    """
+    # Example: Calculate risk-adjusted alpha
+    if 'alpha' in df.columns and 'sd' in df.columns:
         df['risk_adjusted_alpha'] = df['alpha'] / df['sd']
 
     # Example: Calculate beta-adjusted returns
@@ -37,7 +75,16 @@ def calculate_performance_metrics(df):
 
 
 def encode_categorical_features(df):
-   # Skip one-hot encoding since the columns are already encoded
+    """
+    Encode categorical features using one-hot encoding.
+
+    Args:
+        df (pd.DataFrame): Preprocessed dataset.
+
+    Returns:
+        pd.DataFrame: Dataset with encoded categorical features.
+    """
+    # Skip one-hot encoding since the columns are already encoded
     print("Skipping one-hot encoding as the columns are already encoded.")
     return df
 
