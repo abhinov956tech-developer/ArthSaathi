@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react";
-import { Route, Routes } from "react-router-dom";
+import { useState, useContext } from "react";
+import { Route, Routes, Navigate } from "react-router-dom";
 import Sidebar from "./components/sidebar/Sidebar";
-import MobileMenu from "./components/mobileMenu/MobileMenu";
+import { ToastContainer } from "react-toastify";
+import { AppContext } from "./context/AppContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 
-// Import all components directly (no lazy loading)
+// Import all components
 import Home from "./pages/Home";
 import Budget from "./pages/Budget";
 import Expenses from "./pages/Expenses";
@@ -11,81 +13,53 @@ import Learn from "./pages/Learn";
 import Investment from "./pages/Investment";
 import Accounts from "./pages/Accounts";
 import Settings from "./pages/Settings";
+
 // Settings Pages
-import AccountSettings from './pages/settings/AccountSettings';
-import NotificationsSettings from './pages/settings/NotificationsSettings';
-import PrivacySecuritySettings from './pages/settings/PrivacySecuritySettings';
-import HelpandSupportSettings from './pages/settings/HelpandSupportSettings';
+import AccountSettings from "./pages/settings/AccountSettings";
+import NotificationsSettings from "./pages/settings/NotificationsSettings";
+import PrivacySecuritySettings from "./pages/settings/PrivacySecuritySettings";
+import HelpandSupportSettings from "./pages/settings/HelpandSupportSettings";
+
+// Auth Pages
+import Login from "./landing/Login";
+import VerifyEmail from "./landing/VerifyEmail";
+import ResetPassword from "./landing/ResetPassword";
+import HomeLand from "./landing/Home";
 
 const App = () => {
+  const { isLoggedin } = useContext(AppContext);
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768); // Initial check for mobile screen
-
-  // Hook to handle window resizing
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768); // Update state on resize
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  const toggleSidebar = () => {
-    setIsSidebarExpanded(!isSidebarExpanded);
-  };
 
   return (
-    <div>
-      {/* Show Mobile Menu for small screens */}
-      {isMobile ? (
-        <>
-          <MobileMenu />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/accounts" element={<Accounts />} />
-            <Route path="/budget" element={<Budget />} />
-            <Route path="/expenses" element={<Expenses />} />
-            <Route path="/learn" element={<Learn />} />
-            <Route path="/investment" element={<Investment />} />
-            <Route path="/settings" element={<Settings />} />
-            {/* Settings Sub-Routes */}
-            <Route path="/settings-account" element={<AccountSettings />} />
-            <Route path="/settings-notification" element={<NotificationsSettings />} />
-            <Route path="/settings-privacy" element={<PrivacySecuritySettings />} />
-            <Route path="/settings-help" element={<HelpandSupportSettings />} />
-          </Routes>
-        </>
-      ) : (
-        <div className="min-h-screen flex bg-white lg:bg-[#F3F3F3]">
-          {/* Sidebar for larger screens */}
-          <Sidebar
-            isExpanded={isSidebarExpanded}
-            toggleSidebar={toggleSidebar}
-          />
-          {/* Main content area */}
-          <div
-            className={`flex ${
-              isSidebarExpanded ? "ml-[270px]" : "ml-24"
-            } lg:bg-[#F3F3F3] bg-white transition-all duration-300`}
-          >
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/accounts" element={<Accounts />} />
-              <Route path="/budget" element={<Budget />} />
-              <Route path="/expenses" element={<Expenses />} />
-              <Route path="/learn" element={<Learn />} />
-              <Route path="/investment" element={<Investment />} />
-              <Route path="/settings" element={<Settings />} />
-              {/* Settings Sub-Routes */}
-            <Route path="/settings-account" element={<AccountSettings />} />
-            <Route path="/settings-notification" element={<NotificationsSettings />} />
-            <Route path="/settings-privacy" element={<PrivacySecuritySettings />} />
-            <Route path="/settings-help" element={<HelpandSupportSettings />} />
-            </Routes>
-          </div>
-        </div>
-      )}
+    <div className="min-h-screen flex bg-white lg:bg-[#F3F3F3]">
+      {isLoggedin && <Sidebar isExpanded={isSidebarExpanded} toggleSidebar={() => setIsSidebarExpanded(!isSidebarExpanded)} />}
+
+      <div className={`flex ${isLoggedin ? (isSidebarExpanded ? "ml-[270px]" : "ml-24") : "ml-0"} lg:bg-[#F3F3F3] bg-white transition-all duration-300`}>
+        <ToastContainer />
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          
+          {/* Protected Routes */}
+          <Route path="/" element={<ProtectedRoute element={<HomeLand />} />} />
+          <Route path="/home" element={<ProtectedRoute element={<Home />} />} />
+          <Route path="/accounts" element={<ProtectedRoute element={<Accounts />} />} />
+          <Route path="/budget" element={<ProtectedRoute element={<Budget />} />} />
+          <Route path="/expenses" element={<ProtectedRoute element={<Expenses />} />} />
+          <Route path="/learn" element={<ProtectedRoute element={<Learn />} />} />
+          <Route path="/investment" element={<ProtectedRoute element={<Investment />} />} />
+          <Route path="/settings" element={<ProtectedRoute element={<Settings />} />} />
+          <Route path="/settings-account" element={<ProtectedRoute element={<AccountSettings />} />} />
+          <Route path="/settings-notification" element={<ProtectedRoute element={<NotificationsSettings />} />} />
+          <Route path="/settings-privacy" element={<ProtectedRoute element={<PrivacySecuritySettings />} />} />
+          <Route path="/settings-help" element={<ProtectedRoute element={<HelpandSupportSettings />} />} />
+
+          {/* Redirect all unknown routes */}
+          <Route path="*" element={<Navigate to={isLoggedin ? "/home" : "/login"} />} />
+        </Routes>
+      </div>
     </div>
   );
 };
