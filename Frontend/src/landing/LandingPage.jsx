@@ -1,4 +1,8 @@
+<<<<<<< HEAD:Frontend/src/landing/LandingPage.jsx
 import { useState, useEffect } from "react";
+=======
+import React, { useState, useEffect } from "react";
+>>>>>>> 438bd87cc91cf3a27b5f0158eb5a3c6e99c474e7:Frontend/src/pages/Landingpage.jsx
 import { Link } from "react-router-dom";
 import { 
   ChevronRight, 
@@ -8,11 +12,21 @@ import {
   Users, 
   Shield, 
   TrendingUp, 
+<<<<<<< HEAD:Frontend/src/landing/LandingPage.jsx
   ArrowRight,
   CheckCircle
 } from "lucide-react";
 
 const FeatureCard = ({ title, description }) => {
+=======
+  ArrowRight, 
+  Play,
+  CheckCircle,
+  ExternalLink
+} from "lucide-react";
+
+const FeatureCard = ({ icon: Icon, title, description }) => {
+>>>>>>> 438bd87cc91cf3a27b5f0158eb5a3c6e99c474e7:Frontend/src/pages/Landingpage.jsx
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 flex flex-col items-center text-center relative overflow-hidden group transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
       {/* Background glow effect */}
