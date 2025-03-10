@@ -43,7 +43,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import { Plus, Users, User, Wallet, Trash2, Edit } from "lucide-react";
+import { Plus, Users, User, Wallet, Trash2, Edit, DollarSign, BadgePercent } from "lucide-react";
 import { AccountCard } from "@/components/AccountCard";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -56,6 +56,11 @@ const FormSchema = z.object({
     .string()
     .min(2, { message: "Last name must be at least 2 characters." }),
   balance: z.string().min(1, { message: "Balance is required." }),
+  income: z.string().min(1, { message: "Income is required." }),
+  age: z.string().min(1, { message: "Age is required." }),
+  dependents: z.string().min(0),
+  disposableIncome: z.string().min(1, { message: "Disposable income is required." }),
+  desiredSavings: z.string().min(1, { message: "Desired savings is required." }),
   accountType: z.enum(["current", "savings", "family"]),
   isDefault: z.boolean().optional(),
   familyMembers: z.array(
@@ -79,6 +84,11 @@ const Accounts = () => {
       firstName: "",
       lastName: "",
       balance: "",
+      income: "",
+      age: "",
+      dependents: "0",
+      disposableIncome: "",
+      desiredSavings: "",
       accountType: "current",
       isDefault: false,
       familyMembers: [],
@@ -93,6 +103,11 @@ const Accounts = () => {
       form.reset({
         ...accountToEdit,
         balance: accountToEdit.balance.toString(),
+        income: accountToEdit.income ? accountToEdit.income.toString() : "",
+        age: accountToEdit.age ? accountToEdit.age.toString() : "",
+        dependents: accountToEdit.dependents ? accountToEdit.dependents.toString() : "0",
+        disposableIncome: accountToEdit.disposableIncome ? accountToEdit.disposableIncome.toString() : "",
+        desiredSavings: accountToEdit.desiredSavings ? accountToEdit.desiredSavings.toString() : "",
         familyMembers: accountToEdit.familyMembers || [],
       });
       
@@ -107,6 +122,11 @@ const Accounts = () => {
       firstName: "",
       lastName: "",
       balance: "",
+      income: "",
+      age: "",
+      dependents: "0",
+      disposableIncome: "",
+      desiredSavings: "",
       accountType: "current",
       isDefault: false,
       familyMembers: [],
@@ -121,6 +141,11 @@ const Accounts = () => {
       ...data,
       id: accountToEdit ? accountToEdit.id : Date.now().toString(),
       balance: parseFloat(data.balance),
+      income: parseFloat(data.income),
+      age: parseInt(data.age),
+      dependents: parseInt(data.dependents),
+      disposableIncome: parseFloat(data.disposableIncome),
+      desiredSavings: parseFloat(data.desiredSavings),
     };
 
     if (data.accountType === "family") {
@@ -235,9 +260,35 @@ const Accounts = () => {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="mb-4">
-                      <p className="text-sm text-muted-foreground">Balance</p>
-                      <p className="text-2xl font-bold">${account.balance.toFixed(2)}</p>
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Balance</p>
+                        <p className="text-2xl font-bold">${account.balance.toFixed(2)}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Income</p>
+                        <p className="text-lg font-medium">${account.income?.toFixed(2) || '0.00'}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-3 gap-3 mb-4">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Age</p>
+                        <p className="text-sm font-medium">{account.age || '-'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Dependents</p>
+                        <p className="text-sm font-medium">{account.dependents || '0'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Desired Savings</p>
+                        <p className="text-sm font-medium">${account.desiredSavings?.toFixed(2) || '0.00'}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="mb-2">
+                      <p className="text-xs text-muted-foreground">Disposable Income</p>
+                      <p className="text-sm font-medium">${account.disposableIncome?.toFixed(2) || '0.00'}</p>
                     </div>
                     
                     {account.accountType === "family" && account.familyMembers && account.familyMembers.length > 0 && (
@@ -337,6 +388,43 @@ const Accounts = () => {
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
+                  name="age"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Age</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="25"
+                          type="number"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="dependents"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Dependents</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="0"
+                          type="number"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
                   name="balance"
                   render={({ field }) => (
                     <FormItem>
@@ -375,6 +463,79 @@ const Accounts = () => {
                           <SelectItem value="family">Family</SelectItem>
                         </SelectContent>
                       </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 gap-4">
+                <FormField
+                  control={form.control}
+                  name="income"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Monthly Income</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <DollarSign className="h-4 w-4 absolute left-3 top-3 text-muted-foreground" />
+                          <Input
+                            placeholder="5000.00"
+                            type="number"
+                            step="0.01"
+                            className="pl-9"
+                            {...field}
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="disposableIncome"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Disposable Income</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <DollarSign className="h-4 w-4 absolute left-3 top-3 text-muted-foreground" />
+                          <Input
+                            placeholder="1000.00"
+                            type="number"
+                            step="0.01"
+                            className="pl-9"
+                            {...field}
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="desiredSavings"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Desired Monthly Savings</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <BadgePercent className="h-4 w-4 absolute left-3 top-3 text-muted-foreground" />
+                          <Input
+                            placeholder="500.00"
+                            type="number"
+                            step="0.01"
+                            className="pl-9"
+                            {...field}
+                          />
+                        </div>
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
