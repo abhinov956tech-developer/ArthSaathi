@@ -1,11 +1,20 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 import pandas as pd
 import joblib
 import numpy as np
+from fastapi.middleware.cors import CORSMiddleware
 
-app = Flask(__name__)
-CORS(app)  # Enable CORS for cross-origin requests
+app = FastAPI()
+
+# Enable CORS for cross-origin requests
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Load the trained model and feature list
 model_path = "satej/models/linear_regression.pkl"
@@ -13,12 +22,27 @@ feature_columns_path = "satej/models/feature_columns.pkl"
 lr_model = joblib.load(model_path)
 feature_columns = joblib.load(feature_columns_path)
 
+class InputData(BaseModel):
+    expense_ratio: float
+    sharpe: float
+    sortino: float
+    fund_size_cr: float
+    fund_age_yr: float
+    sd: float
+    beta: float
+    alpha: float
+    risk_level_2: bool
+    risk_level_3: bool
+    risk_level_4: bool
+    risk_level_5: bool
+    risk_level_6: bool
+
 def preprocess_input(input_data):
     """
     Preprocess the input JSON data to match the model's requirements.
     """
     # Convert JSON to DataFrame
-    df = pd.DataFrame([input_data])
+    df = pd.DataFrame([input_data.dict()])
 
     # Add missing columns with default values
     for col in feature_columns:
@@ -37,12 +61,9 @@ def preprocess_input(input_data):
 
     return X
 
-@app.route('/predict', methods=['POST'])
-def predict():
+@app.post('/predict')
+def predict(input_data: InputData):
     try:
-        # Get input JSON data
-        input_data = request.json
-
         # Preprocess input
         processed_data = preprocess_input(input_data)
 
@@ -55,20 +76,18 @@ def predict():
         predicted_5yr_return = predicted_1yr_return * 5  # Example scaling
 
         # Return predictions
-        return jsonify({
+        return {
             "status": "success",
             "predictions": {
                 "1_year_return": float(predicted_1yr_return),
                 "3_year_return": float(predicted_3yr_return),
                 "5_year_return": float(predicted_5yr_return),
             }
-        })
+        }
 
     except Exception as e:
-        return jsonify({
-            "status": "error",
-            "error": str(e)
-        }), 400
+        raise HTTPException(status_code=400, detail=str(e))
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    import uvicorn
+    uvicorn.run(app, host='0.0.0.0', port=8000)
