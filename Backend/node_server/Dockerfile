@@ -1,22 +1,25 @@
-# Use official Node.js LTS image with Alpine
+# Use official Node.js LTS with Alpine (smaller image)
 FROM node:18-alpine
 
 # Set working directory
 WORKDIR /app
 
-# Copy package files first for better layer caching
-COPY package*.json ./ 
+# Install dependencies first for better caching
+COPY package*.json ./
 COPY prisma/schema.prisma ./prisma/
 
-# Install dependencies (including Prisma)
+# Install production dependencies
 RUN npm ci --only=production && \
     npx prisma generate
 
-# Copy all application files
+# Copy application files
 COPY . .
 
-# Expose the port your server uses
-EXPOSE 3000  # ✅ Comment should be on a new line
+# Set environment variables (create .env.production for production)
+COPY .env.production ./.env
 
-# Start the Node.js server
-CMD ["node", "./routes/index.js"]
+# Expose the server port
+EXPOSE 3000
+
+# Start the server with ES modules support
+CMD ["node", "--experimental-vm-modules", "index.js"]
