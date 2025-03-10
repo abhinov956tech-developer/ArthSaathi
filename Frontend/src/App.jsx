@@ -4,6 +4,7 @@ import Sidebar from "./components/sidebar/Sidebar";
 import MobileMenu from "./components/mobileMenu/MobileMenu";
 
 // Import all components directly (no lazy loading)
+import Landingpage from "./pages/Landingpage";
 import Home from "./pages/Home";
 import Budget from "./pages/Budget";
 import Expenses from "./pages/Expenses";
@@ -16,6 +17,7 @@ import AccountSettings from './pages/settings/AccountSettings';
 import NotificationsSettings from './pages/settings/NotificationsSettings';
 import PrivacySecuritySettings from './pages/settings/PrivacySecuritySettings';
 import HelpandSupportSettings from './pages/settings/HelpandSupportSettings';
+
 
 const App = () => {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
@@ -42,6 +44,7 @@ const App = () => {
         <>
           <MobileMenu />
           <Routes>
+          <Route path="/landingpage" element={<Landingpage />} />
             <Route path="/" element={<Home />} />
             <Route path="/accounts" element={<Accounts />} />
             <Route path="/budget" element={<Budget />} />
@@ -70,6 +73,7 @@ const App = () => {
             } lg:bg-[#F3F3F3] bg-white transition-all duration-300`}
           >
             <Routes>
+            <Route path="/landingpage" element={<Landingpage />} />
               <Route path="/" element={<Home />} />
               <Route path="/accounts" element={<Accounts />} />
               <Route path="/budget" element={<Budget />} />
