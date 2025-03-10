@@ -1,8 +1,8 @@
 const express = require('express');
-const User = require('./routes/User.js')
-const Transaction = require('./routes/Transactions.js')
-const Account= require('./routes/Accounts.js')
-const Profile = require('./routes/Financial_Profile.js')
+const User = require('./User.js')
+const Transaction = require('./Transactions.js')
+const Account= require('./Accounts.js')
+const Profile = require('./Financial_Profile.js')
 const app = express();
 
 app.use(express.json());
