@@ -5,7 +5,7 @@ import bcrypt from 'bcrypt';
 
 dotenv.config();
 
-const express = require('express');
+import express from "express";
 const User = express.Router();
 const prisma = new PrismaClient();
 const jwt_secret = process.env.JWT_SECRET;
