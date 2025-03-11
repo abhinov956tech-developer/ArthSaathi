@@ -16,6 +16,7 @@ import AccountSettings from './pages/settings/AccountSettings';
 import NotificationsSettings from './pages/settings/NotificationsSettings';
 import PrivacySecuritySettings from './pages/settings/PrivacySecuritySettings';
 import HelpandSupportSettings from './pages/settings/HelpandSupportSettings';
+import Landingpage from "./landing/LandingPage";
 
 const App = () => {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
@@ -42,6 +43,7 @@ const App = () => {
         <>
           <MobileMenu />
           <Routes>
+           
             <Route path="/" element={<Home />} />
             <Route path="/accounts" element={<Accounts />} />
             <Route path="/budget" element={<Budget />} />
@@ -70,6 +72,7 @@ const App = () => {
             } lg:bg-[#F3F3F3] bg-white transition-all duration-300`}
           >
             <Routes>
+            <Route path="/landing" element={<Landingpage/>}></Route>
               <Route path="/" element={<Home />} />
               <Route path="/accounts" element={<Accounts />} />
               <Route path="/budget" element={<Budget />} />
