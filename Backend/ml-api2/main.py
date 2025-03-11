@@ -67,8 +67,8 @@ async def chatbot(request: Request):
         return JSONResponse(content={'response': "Please provide a message."})
 
     try:
-        model = genai.GenerativeModel("gemini-1.5-flash")
-        response = model.generate_content(user_input, system_instruction="You are a financial assistant. Provide helpful financial advice, budgeting tips, and investment guidance.")
+        model = genai.GenerativeModel("gemini-1.5-flash", system_instruction="You are a financial assistant. Provide helpful financial advice, budgeting tips, and investment guidance based on user queries.")
+        response = model.generate_content(user_input)
         bot_reply = response.text
     except Exception as e:
         bot_reply = "Sorry, there was an error processing your request."
