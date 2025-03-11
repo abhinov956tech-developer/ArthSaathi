@@ -1,9 +1,4 @@
-"use client";
-import React, { useEffect, useState, useCallback } from "react";
-import { toast } from "react-hot-toast";
-import CreateBudget from "./CreateBudget";
-import BudgetItem from "./BudgetItem";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import { Search, Filter, ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -14,131 +9,79 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-
-// API service functions
-const budgetService = {
-  async getBudgets() {
-    try {
-      const response = await fetch('/api/budgets');
-      if (!response.ok) {
-        throw new Error('Failed to fetch budgets');
-      }
-      return await response.json();
-    } catch (error) {
-      console.error('Error fetching budgets:', error);
-      throw error;
-    }
-  },
-
-  async deleteBudget(id) {
-    try {
-      const response = await fetch(`/api/budgets/${id}`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) {
-        throw new Error('Failed to delete budget');
-      }
-      return await response.json();
-    } catch (error) {
-      console.error('Error deleting budget:', error);
-      throw error;
-    }
-  },
-
-  async createBudget(budgetData) {
-    try {
-      const response = await fetch('/api/budgets', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(budgetData),
-      });
-      if (!response.ok) {
-        throw new Error('Failed to create budget');
-      }
-      return await response.json();
-    } catch (error) {
-      console.error('Error creating budget:', error);
-      throw error;
-    }
-  },
-
-  async updateBudget(id, budgetData) {
-    try {
-      const response = await fetch(`/api/budgets/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(budgetData),
-      });
-      if (!response.ok) {
-        throw new Error('Failed to update budget');
-      }
-      return await response.json();
-    } catch (error) {
-      console.error('Error updating budget:', error);
-      throw error;
-    }
-  }
-};
+import CreateBudget from "./CreateBudget";
+import BudgetItem from "./BudgetItem";
+import { useCallback, useEffect, useState } from "react";
+import { useRecoilState } from "recoil";
+import { accountAtom } from "@/Atom/Atoms";
+import toast from "react-hot-toast";
 
 function BudgetList() {
-  const navigate = useNavigate();
-  const [budgetList, setBudgetList] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState('all');
-  const [budgetToEdit, setBudgetToEdit] = useState(null);
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  // const { theme } = useTheme();
-  const [theme, setTheme] = useState('light');
+    const navigate = useNavigate();
+    const [accounts] = useRecoilState(accountAtom);
+    const [budgetList, setBudgetList] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedFilter, setSelectedFilter] = useState('all'); // Add this line
+    const [budgetToEdit, setBudgetToEdit] = useState(null);
+    const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  // ... other state declarations remain the same ...
+
+  // Map accounts data to budget format
+  const mapAccountsToBudgets = useCallback(() => {
+    if (!accounts) return [];
+    
+    return [
+      { id: 1, name: "Groceries", amount: accounts.Groceries || 0 },
+      { id: 2, name: "Transport", amount: accounts.Transport || 0 },
+      { id: 3, name: "Eating Out", amount: accounts.Eating_Out || 0 },
+      { id: 4, name: "Entertainment", amount: accounts.Entertainment || 0 },
+      { id: 5, name: "Utilities", amount: accounts.Utilities || 0 },
+      { id: 6, name: "Healthcare", amount: accounts.Healthcare || 0 },
+      { id: 7, name: "Education", amount: accounts.Education || 0 },
+      { id: 8, name: "Miscellaneous", amount: accounts.Miscellaneous || 0 }
+    ];
+  }, [accounts]);
 
   const getBudgetList = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await budgetService.getBudgets();
-      setBudgetList(data);
+      // Use mapped accounts data instead of API call
+      const mappedBudgets = mapAccountsToBudgets();
+      setBudgetList(mappedBudgets);
     } catch (error) {
       toast.error('Failed to load budgets');
-      // Fallback to demo data for development/preview
-      setBudgetList([
-        {
-          id: 1,
-          name: "Groceries",
-          amount: 500,
-          totalSpend: 250,
-          totalItem: 5,
-          icon: "🛒",
-        },
-        {
-          id: 2,
-          name: "Entertainment",
-          amount: 300,
-          totalSpend: 120,
-          totalItem: 3,
-          icon: "🎬",
-        },
-        {
-          id: 3,
-          name: "Transportation",
-          amount: 200,
-          totalSpend: 180,
-          totalItem: 2,
-          icon: "🚗",
-        },
-      ]);
+      setBudgetList([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [mapAccountsToBudgets]);
 
   useEffect(() => {
     getBudgetList();
-  }, [getBudgetList]);
+  }, [getBudgetList, accounts]); // Refresh when accounts change
 
-  const handleDeleteBudget = async (id) => {
+  // Update summary calculations to use accounts data directly
+  const totalBudgeted = Object.values({
+    Groceries: accounts?.Groceries || 0,
+    Transport: accounts?.Transport || 0,
+    Eating_Out: accounts?.Eating_Out || 0,
+    Entertainment: accounts?.Entertainment || 0,
+    Utilities: accounts?.Utilities || 0,
+    Healthcare: accounts?.Healthcare || 0,
+    Education: accounts?.Education || 0,
+    Miscellaneous: accounts?.Miscellaneous || 0
+  }).reduce((sum, val) => sum + val, 0);
+
+  const totalSpent = accounts ? 
+    accounts.Income - accounts.Disposable_Income - accounts.Desired_Savings : 0;
+
+  const overBudgetCount = budgetList.filter(budget => {
+    const spent = (budget.amount / totalBudgeted) * totalSpent;
+    return spent > budget.amount;
+  }).length;
+
+ const handleDeleteBudget = async (id) => {
     try {
       await budgetService.deleteBudget(id);
       setBudgetList(prevList => prevList.filter(budget => budget.id !== id));
@@ -189,32 +132,30 @@ function BudgetList() {
         return matchesSearch;
     }
   });
-
-  // Calculate summary statistics
-  const totalBudgeted = budgetList.reduce((sum, budget) => sum + (budget.amount || 0), 0);
-  const totalSpent = budgetList.reduce((sum, budget) => sum + (budget.totalSpend || 0), 0);
-  const overBudgetCount = budgetList.filter(budget => budget.totalSpend > budget.amount).length;
-
   return (
-    <div className="space-y-6">
-      {/* Summary Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="space-y-6 w-full">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white dark:bg-slate-800 p-4 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
-          <p className="text-sm text-slate-500 dark:text-slate-400">Total Budgeted</p>
-          <p className="text-2xl font-bold dark:text-white">${totalBudgeted.toLocaleString()}</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Monthly Income</p>
+          <p className="text-2xl font-bold dark:text-white">₹{accounts?.Income?.toLocaleString() || 0}</p>
         </div>
         <div className="bg-white dark:bg-slate-800 p-4 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
-          <p className="text-sm text-slate-500 dark:text-slate-400">Total Spent</p>
-          <p className="text-2xl font-bold dark:text-white">${totalSpent.toLocaleString()}</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Disposable Income</p>
+          <p className="text-2xl font-bold dark:text-white">₹{accounts?.Disposable_Income?.toLocaleString() || 0}</p>
         </div>
         <div className="bg-white dark:bg-slate-800 p-4 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
-          <p className="text-sm text-slate-500 dark:text-slate-400">Over Budget Items</p>
-          <p className="text-2xl font-bold dark:text-white">{overBudgetCount}</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Desired Savings</p>
+          <p className="text-2xl font-bold dark:text-white">₹{accounts?.Desired_Savings?.toLocaleString() || 0}</p>
+        </div>
+        <div className="bg-white dark:bg-slate-800 p-4 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
+          <p className="text-sm text-slate-500 dark:text-slate-400">Remaining Balance</p>
+          <p className="text-2xl font-bold dark:text-white">
+            ₹{(accounts?.Disposable_Income - totalBudgeted)?.toLocaleString() || 0}
+          </p>
         </div>
       </div>
 
-      {/* Search and Filter */}
-      <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
+     <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={18} />
           <Input

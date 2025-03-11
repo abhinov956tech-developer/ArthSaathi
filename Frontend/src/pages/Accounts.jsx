@@ -47,37 +47,32 @@ import { Plus, Users, User, Wallet, Trash2, Edit, DollarSign, BadgePercent } fro
 import { AccountCard } from "@/components/AccountCard";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { useRecoilState, useSetRecoilState } from "recoil";
+import { accountAtom } from "@/Atom/Atoms";
 
 const FormSchema = z.object({
-  firstName: z
-    .string()
-    .min(2, { message: "First name must be at least 2 characters." }),
-  lastName: z
-    .string()
-    .min(2, { message: "Last name must be at least 2 characters." }),
-  balance: z.string().min(1, { message: "Balance is required." }),
-  income: z.string().min(1, { message: "Income is required." }),
-  age: z.string().min(1, { message: "Age is required." }),
-  dependents: z.string().min(0),
-  disposableIncome: z.string().min(1, { message: "Disposable income is required." }),
-  desiredSavings: z.string().min(1, { message: "Desired savings is required." }),
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  balance: z.string().min(1, "Balance is required"),
+  income: z.string().min(1, "Income is required"),
+  age: z.string().min(1, "Age is required"),
+  dependents: z.string().min(1, "Dependents is required"),
+  disposableIncome: z.string().min(1, "Disposable income is required"),
+  desiredSavings: z.string().min(1, "Desired savings is required"),
   accountType: z.enum(["current", "savings", "family"]),
-  isDefault: z.boolean().optional(),
-  familyMembers: z.array(
-    z.object({
-      name: z.string().min(2, { message: "Name must be at least 2 characters." }),
-      relation: z.string().min(2, { message: "Relation must be specified." }),
-    })
-  ).optional(),
+  isDefault: z.boolean(),
+  familyMembers: z.array(z.object({
+    name: z.string().min(1, "Name is required"),
+    relation: z.string().min(1, "Relation is required"),
+  })),
 });
 
-
 const Accounts = () => {
-  const [accounts, setAccounts] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
   const [familyMembers, setFamilyMembers] = useState([{ name: "", relation: "" }]);
   const [accountToEdit, setAccountToEdit] = useState(null);
+  const [accounts, setAccounts] = useRecoilState(accountAtom);
 
   const form = useForm({
     resolver: zodResolver(FormSchema),
@@ -111,7 +106,7 @@ const Accounts = () => {
         desiredSavings: accountToEdit.desiredSavings ? accountToEdit.desiredSavings.toString() : "",
         familyMembers: accountToEdit.familyMembers || [],
       });
-      
+
       if (accountToEdit.familyMembers) {
         setFamilyMembers(accountToEdit.familyMembers);
       }
@@ -144,25 +139,22 @@ const Accounts = () => {
       balance: parseFloat(data.balance),
       income: parseFloat(data.income),
       age: parseInt(data.age),
+      accountType: data.accountType,
       dependents: parseInt(data.dependents),
       disposableIncome: parseFloat(data.disposableIncome),
       desiredSavings: parseFloat(data.desiredSavings),
+      familyMembers: data.accountType === "family" ? familyMembers : [],
     };
 
-    if (data.accountType === "family") {
-      accountData.familyMembers = familyMembers.filter(member => member.name && member.relation);
+    if (accountToEdit) {
+      setAccounts((prev) =>
+        prev.map((acc) => (acc.id === accountToEdit.id ? accountData : acc))
+      );
+    } else {
+      // Fix 2: Add to array correctly
+      setAccounts((prev) => [...prev, accountData]);
     }
 
-    if (accountToEdit) {
-      // Update existing account
-      setAccounts(prev => prev.map(acc => 
-        acc.id === accountToEdit.id ? accountData : acc
-      ));
-    } else {
-      // Add new account
-      setAccounts(prev => [...prev, accountData]);
-    }
-    
     closeAndResetForm();
   };
 
@@ -183,7 +175,7 @@ const Accounts = () => {
   };
 
   const handleDeleteAccount = (accountId) => {
-    setAccounts(prev => prev.filter(acc => acc.id !== accountId));
+    setAccounts((prev) => prev.filter((acc) => acc.id !== accountId));
   };
 
   const handleEditAccount = (account) => {
@@ -191,19 +183,18 @@ const Accounts = () => {
     setOpenDialog(true);
   };
 
-  const filteredAccounts = activeTab === "all" 
-    ? accounts 
-    : accounts.filter(account => account.accountType === activeTab);
-
-  const getTotalBalance = () => {
-    return accounts.reduce((sum, account) => sum + account.balance, 0).toFixed(2);
-  };
+  const filteredAccounts = activeTab === "all"
+    ? accounts
+    : accounts.filter((account) => account.accountType === activeTab);
 
   const getAccountTypeIcon = (type) => {
-    switch(type) {
-      case "family": return <Users className="h-5 w-5" />;
-      case "savings": return <Wallet className="h-5 w-5" />;
-      default: return <User className="h-5 w-5" />;
+    switch (type) {
+      case "family":
+        return <Users className="h-5 w-5" />;
+      case "savings":
+        return <Wallet className="h-5 w-5" />;
+      default:
+        return <User className="h-5 w-5" />;
     }
   };
 
@@ -215,15 +206,6 @@ const Accounts = () => {
           <p className="text-muted-foreground">
             Manage your personal and family finances
           </p>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="text-right">
-            <p className="text-sm text-muted-foreground">Total Balance</p>
-            <p className="text-2xl font-bold">${getTotalBalance()}</p>
-          </div>
-          <Button onClick={() => setOpenDialog(true)} className="flex gap-2">
-            <Plus size={18} /> New Account
-          </Button>
         </div>
       </div>
 
@@ -271,7 +253,7 @@ const Accounts = () => {
                         <p className="text-lg font-medium">${account.income?.toFixed(2) || '0.00'}</p>
                       </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-3 gap-3 mb-4">
                       <div>
                         <p className="text-xs text-muted-foreground">Age</p>
@@ -286,12 +268,12 @@ const Accounts = () => {
                         <p className="text-sm font-medium">${account.desiredSavings?.toFixed(2) || '0.00'}</p>
                       </div>
                     </div>
-                    
+
                     <div className="mb-2">
                       <p className="text-xs text-muted-foreground">Disposable Income</p>
                       <p className="text-sm font-medium">${account.disposableIncome?.toFixed(2) || '0.00'}</p>
                     </div>
-                    
+
                     {account.accountType === "family" && account.familyMembers && account.familyMembers.length > 0 && (
                       <div className="mt-4">
                         <p className="text-sm font-medium mb-2">Family Members</p>
@@ -308,15 +290,15 @@ const Accounts = () => {
                   </CardContent>
                   <Separator />
                   <CardFooter className="pt-4 flex justify-end gap-2">
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={() => handleEditAccount(account)}
                     >
                       <Edit className="h-4 w-4 mr-1" /> Edit
                     </Button>
-                    <Button 
-                      variant="destructive" 
+                    <Button
+                      variant="destructive"
                       size="sm"
                       onClick={() => handleDeleteAccount(account.id)}
                     >
@@ -332,8 +314,8 @@ const Accounts = () => {
                 </div>
                 <h3 className="text-lg font-medium mb-2">No accounts found</h3>
                 <p className="text-muted-foreground mb-4">
-                  {activeTab === "all" 
-                    ? "You haven't created any accounts yet." 
+                  {activeTab === "all"
+                    ? "You haven't created any accounts yet."
                     : `You don't have any ${activeTab} accounts.`}
                 </p>
                 <Button onClick={() => setOpenDialog(true)}>
@@ -467,7 +449,7 @@ const Accounts = () => {
                       <FormMessage />
                     </FormItem>
                   )}
-                />
+                />  
               </div>
 
               <div className="grid grid-cols-1 gap-4">

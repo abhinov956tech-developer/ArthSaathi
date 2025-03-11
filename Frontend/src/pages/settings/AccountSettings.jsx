@@ -5,64 +5,42 @@ import SettingsSidebar from "@/components/settings/SettingsSidebar";
 import ImageUpload from "../../components/pop-up/ImageUpload";
 import ChangePassword from "../../components/pop-up/ChangePassword";
 import DeleteAccountConfirmation from "../../components/DeleteAccountConfirmation";
+import { useRecoilState } from "recoil";
+import { User } from "@/Atom/Atoms";
 
 const AccountSettings = () => {
-  // State for form data
+  const [user, setUser] = useRecoilState(User);
+
+  // Local state to manage form inputs and UI behavior
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
+    password:"",
     region: "",
   });
-  
-  // State for UI controls
-  const [isPasswordPopupOpen, setIsPasswordPopupOpen] = useState(false);
-  const [isImagePopupOpen, setIsImagePopupOpen] = useState(false);
-  const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
+
   const [profilePicture, setProfilePicture] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [isPasswordPopupOpen, setIsPasswordPopupOpen] = useState(false);
+  const [isImagePopupOpen, setIsImagePopupOpen] = useState(false);
+  const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
 
-  // Fetch user data on component mount
-  useEffect(() => {
-    const fetchUserData = async () => {
-      setIsLoading(true);
-      try {
-        const response = await fetch('/api/user/profile');
-        if (!response.ok) throw new Error('Failed to fetch user data');
-        
-        const userData = await response.json();
-        setFormData({
-          fullName: userData.fullName || '',
-          email: userData.email || '',
-          region: userData.region || '',
-        });
-        
-        if (userData.profilePicture) {
-          setPreviewUrl(userData.profilePicture);
-        }
-      } catch (error) {
-        toast.error('Failed to load user data');
-        console.error(error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  // Fetch user data when the component mounts
 
-    fetchUserData();
-  }, []);
-
-  // Handle input changes
+  // Handle input change for form fields
   const handleInputChange = (e) => {
     const { id, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [id]: value,
-    }));
+
+    // Update form state and Recoil state
+    setFormData((prev) => ({ ...prev, [id]: value }));
+    setUser((prev) => ({ ...prev, [id]: value }));
+
     setIsSaved(false);
   };
 
-  // Handle profile picture upload
+  // Handle profile picture update
   const handleProfilePictureUpdate = (imageUrl) => {
     setProfilePicture(imageUrl);
     setPreviewUrl(imageUrl);
@@ -74,201 +52,148 @@ const AccountSettings = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    
+  
     try {
-      const response = await fetch('/api/user/profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          profilePicture: profilePicture || previewUrl,
-        }),
+      // Validate email (basic example)
+      if (!formData.email || !formData.email.includes("@")) {
+        toast.error("Please enter a valid email address");
+        return;
+      }
+  
+      // Update user state
+      setUser({
+        ...user, // Preserve existing user data
+        email: formData.email,
+        password: formData.password || "123456", // Use formData password or fallback
       });
-      
-      if (!response.ok) throw new Error('Failed to update profile');
-      
-      toast.success('Profile updated successfully');
+  
+      // Simulate an API call or async operation
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate delay
+  
+      // Show success message
+      toast.success("Profile updated successfully");
       setIsSaved(true);
+  
+      // Reset saved state after 3 seconds
       setTimeout(() => setIsSaved(false), 3000);
     } catch (error) {
-      toast.error('Failed to update profile');
-      console.error(error);
+      // Handle errors
+      toast.error("Failed to update profile");
+      console.error("Error updating profile:", error);
     } finally {
+      // Reset loading state
       setIsLoading(false);
     }
   };
 
-  // Region options
   const regionOptions = [
     { value: "", label: "Select region" },
-    { value: "america", label: "America (UTC-5)" },
-    { value: "europe", label: "Europe (UTC+1)" },
-    { value: "asia", label: "Asia (UTC+8)" },
-    { value: "australia", label: "Australia (UTC+10)" },
+    { value: "Tier_1", label: "Mumbai" },
+    { value: "Tier_1", label: "Delhi" },
+    { value: "Tier_1", label: "Bangalore" },
+    { value: "Tier_1", label: "Chennai" },
+    { value: "Tier_1", label: "Kolkata" },
+    { value: "Tier_1", label: "Hyderabad" },
+    { value: "Tier_2", label: "Pune" },
+    { value: "Tier_2", label: "Jaipur" },
+    { value: "Tier_2", label: "Ahmedabad" },
+    { value: "Tier_2", label: "Lucknow" },
+    { value: "Tier_2", label: "Kochi" },
+    { value: "Tier_2", label: "Nagpur" },
+    { value: "Tier_2", label: "Visakhapatnam" },
+    { value: "Tier_2", label: "Coimbatore" },
+    { value: "Tier_2", label: "Chandigarh" },
+    { value: "Tier_2", label: "Thiruvananthapuram" },
+    { value: "Tier_2", label: "Bhopal" },
+    { value: "Tier_2", label: "Indore" },
+    { value: "Tier_2", label: "Patna" },
+    { value: "Tier_2", label: "Kanpur" },
+    { value: "Tier_2", label: "Vadodara" },
+    { value: "Tier_2", label: "Agra" },
+    { value: "Tier_2", label: "Nashik" },
+    { value: "Tier_2", label: "Surat" },
+    { value: "Tier_2", label: "Ludhiana" },
+    { value: "Tier_2", label: "Guwahati" },
+    { value: "Tier_2", label: "Bhubaneswar" },
+    { value: "Tier_2", label: "Mysore" },
+    { value: "Tier_2", label: "Amritsar" },
+    { value: "Tier_2", label: "Goa" }
   ];
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex w-screen min-h-screen bg-gray-50">
       <SettingsSidebar />
-      
+
       <div className="flex-1 p-8 md:ml-64">
         <div className="max-w-3xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-2xl font-bold text-gray-900">Account Settings</h1>
-            <p className="text-gray-600 mt-2">
-              Manage your account details, profile picture, and security settings.
-            </p>
-          </div>
+          <h1 className="text-2xl font-bold text-gray-900">Account Settings</h1>
+          <p className="text-gray-600 mt-2">Manage your account details, profile picture, and security settings.</p>
 
-          <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
+          <div className="bg-white rounded-lg shadow-sm p-6 mt-4">
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Full Name */}
-              <div className="flex flex-col md:flex-row md:items-center gap-4">
-                <label htmlFor="fullName" className="w-[150px] text-gray-700 font-medium">
-                  Full Name
-                </label>
+              <div className="flex flex-col md:flex-row gap-4">
+                <label htmlFor="fullName" className="w-[150px] text-gray-700 font-medium">Full Name</label>
                 <input
                   id="fullName"
                   type="text"
                   value={formData.fullName}
                   onChange={handleInputChange}
-                  className="flex-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
                   placeholder="Enter your full name"
                 />
               </div>
 
               {/* Email Address */}
-              <div className="flex flex-col md:flex-row md:items-center gap-4">
-                <label htmlFor="email" className="w-[150px] text-gray-700 font-medium">
-                  Email Address
-                </label>
+              <div className="flex flex-col md:flex-row gap-4">
+                <label htmlFor="email" className="w-[150px] text-gray-700 font-medium">Email</label>
                 <input
                   id="email"
                   type="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="flex-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
                   placeholder="Enter your email address"
                 />
               </div>
 
-              {/* Region/Timezone */}
-              <div className="flex flex-col md:flex-row md:items-center gap-4">
-                <label htmlFor="region" className="w-[150px] text-gray-700 font-medium">
-                  Region
-                </label>
+              {/* Region */}
+              <div className="flex flex-col md:flex-row gap-4">
+                <label htmlFor="region" className="w-[150px] text-gray-700 font-medium">Region</label>
                 <select
                   id="region"
                   value={formData.region}
                   onChange={handleInputChange}
-                  className="flex-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
                 >
                   {regionOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
+                    <option key={option.value} value={option.value}>{option.label}</option>
                   ))}
                 </select>
               </div>
 
               {/* Profile Picture */}
-              <div className="flex flex-col md:flex-row md:items-center gap-4">
+              <div className="flex flex-col md:flex-row gap-4">
                 <label className="w-[150px] text-gray-700 font-medium">Profile Picture</label>
                 <div className="flex items-center gap-4">
                   {previewUrl ? (
-                    <div className="relative">
-                      <img 
-                        src={previewUrl} 
-                        alt="Profile" 
-                        className="w-20 h-20 rounded-full object-cover border-2 border-gray-200" 
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setIsImagePopupOpen(true)}
-                        className="absolute bottom-0 right-0 bg-blue-500 text-white p-1 rounded-full text-xs"
-                        title="Change picture"
-                      >
-                        <BsUpload size={14} />
-                      </button>
-                    </div>
+                    <img src={previewUrl} alt="Profile" className="w-20 h-20 rounded-full border-2" />
                   ) : (
-                    <button
-                      type="button"
-                      onClick={() => setIsImagePopupOpen(true)}
-                      className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center border-2 border-dashed border-gray-300 hover:bg-gray-200 transition-colors"
-                    >
+                    <button type="button" onClick={() => setIsImagePopupOpen(true)} className="w-20 h-20 bg-gray-100 border-2 border-dashed hover:bg-gray-200 transition-colors flex items-center justify-center">
                       <BsUpload size={24} className="text-gray-500" />
                     </button>
                   )}
-                  <span className="text-sm text-gray-500">
-                    Upload a square image for best results
-                  </span>
                 </div>
               </div>
 
-              {/* Password */}
-              <div className="flex flex-col md:flex-row md:items-center gap-4">
-                <label className="w-[150px] text-gray-700 font-medium">Password</label>
-                <button
-                  type="button"
-                  onClick={() => setIsPasswordPopupOpen(true)}
-                  className="text-blue-600 hover:text-blue-800 transition-colors"
-                >
-                  Change Password
-                </button>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex flex-col md:flex-row md:items-center gap-4 pt-4 border-t">
-                <div className="w-[150px]"></div>
-                <div className="flex flex-col md:flex-row gap-4 w-full md:justify-between">
-                  <button
-                    type="button"
-                    onClick={() => setIsDeletePopupOpen(true)}
-                    className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
-                  >
-                    Delete Account
-                  </button>
-                  
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
-                  >
-                    {isLoading ? "Saving..." : isSaved ? (
-                      <>
-                        <BsCheckCircle /> Saved
-                      </>
-                    ) : "Save Changes"}
-                  </button>
-                </div>
-              </div>
+              {/* Save Changes Button */}
+              <button type="submit" disabled={isLoading} className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                {isLoading ? "Saving..." : isSaved ? <><BsCheckCircle /> Saved</> : "Save Changes"}
+              </button>
             </form>
           </div>
         </div>
       </div>
-
-      {/* Popups */}
-      {isImagePopupOpen && (
-        <ImageUpload 
-          closeModal={() => setIsImagePopupOpen(false)} 
-          setProfilePicture={handleProfilePictureUpdate} 
-        />
-      )}
-      
-      {isPasswordPopupOpen && (
-        <ChangePassword 
-          closeModal={() => setIsPasswordPopupOpen(false)} 
-        />
-      )}
-      
-      {isDeletePopupOpen && (
-        <DeleteAccountConfirmation 
-          closeModal={() => setIsDeletePopupOpen(false)} 
-        />
-      )}
     </div>
   );
 };
