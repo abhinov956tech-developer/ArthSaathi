@@ -73,7 +73,9 @@ RUN pip install --no-cache-dir \
     flask-cors==3.0.10 \
     matplotlib==3.7.1 \
     shap==0.44.0 \
-    seaborn==0.12.2  # Added Seaborn here
+    seaborn==0.12.2 \
+    google-generativeai  # Added Google Generative AI
+
 
 # Run the deployment steps directly in the Dockerfile
 RUN python data_preprocessing.py && \
