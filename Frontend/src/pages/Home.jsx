@@ -4,6 +4,7 @@ import Typography from "@mui/material/Typography";
 import CardActionArea from "@mui/material/CardActionArea";
 import { CartesianGrid, XAxis } from "recharts";
 import { Area, AreaChart } from "recharts";
+import { useState, useRef, useEffect } from "react";
 
 import {
   Card,
@@ -11,6 +12,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
 import {
   ChartContainer,
@@ -26,6 +28,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Avatar } from "@/components/ui/avatar";
 
 const cards = [
   {
@@ -37,19 +42,19 @@ const cards = [
   {
     id: 2,
     title: "Monthly Expenses",
-    blance: "₹ 1,00,000",
+    blance: "₹ 40,000",
     month: "- 2.5% ",
   },
   {
     id: 3,
     title: "Monthly Investment",
-    blance: "₹ 1,00,000",
+    blance: "₹ 2,000",
     month: "+ 15.8% ",
   },
   {
     id: 4,
     title: "Swing Rate",
-    blance: "₹ 1,00,000",
+    blance: "₹ 400",
     month: "+ 20.5% ",
   },
 ];
@@ -57,96 +62,46 @@ const cards = [
 const chartData = [
   { date: "2024-04-01", desktop: 222, mobile: 150 },
   { date: "2024-04-02", desktop: 97, mobile: 180 },
-  { date: "2024-04-03", desktop: 167, mobile: 120 },
-  { date: "2024-04-04", desktop: 242, mobile: 260 },
-  { date: "2024-04-05", desktop: 373, mobile: 290 },
-  { date: "2024-04-06", desktop: 301, mobile: 340 },
-  { date: "2024-04-07", desktop: 245, mobile: 180 },
-  { date: "2024-04-08", desktop: 409, mobile: 320 },
-  { date: "2024-04-09", desktop: 59, mobile: 110 },
-  { date: "2024-04-10", desktop: 261, mobile: 190 },
-  { date: "2024-04-11", desktop: 327, mobile: 350 },
-  { date: "2024-04-12", desktop: 292, mobile: 210 },
-  { date: "2024-04-13", desktop: 342, mobile: 380 },
-  { date: "2024-04-14", desktop: 137, mobile: 220 },
-  { date: "2024-04-15", desktop: 120, mobile: 170 },
-  { date: "2024-04-16", desktop: 138, mobile: 190 },
-  { date: "2024-04-17", desktop: 446, mobile: 360 },
-  { date: "2024-04-18", desktop: 364, mobile: 410 },
-  { date: "2024-04-19", desktop: 243, mobile: 180 },
-  { date: "2024-04-20", desktop: 89, mobile: 150 },
-  { date: "2024-04-21", desktop: 137, mobile: 200 },
-  { date: "2024-04-22", desktop: 224, mobile: 170 },
-  { date: "2024-04-23", desktop: 138, mobile: 230 },
-  { date: "2024-04-24", desktop: 387, mobile: 290 },
-  { date: "2024-04-25", desktop: 215, mobile: 250 },
-  { date: "2024-04-26", desktop: 75, mobile: 130 },
-  { date: "2024-04-27", desktop: 383, mobile: 420 },
-  { date: "2024-04-28", desktop: 122, mobile: 180 },
-  { date: "2024-04-29", desktop: 315, mobile: 240 },
-  { date: "2024-04-30", desktop: 454, mobile: 380 },
-  { date: "2024-05-01", desktop: 165, mobile: 220 },
-  { date: "2024-05-02", desktop: 293, mobile: 310 },
-  { date: "2024-05-03", desktop: 247, mobile: 190 },
-  { date: "2024-05-04", desktop: 385, mobile: 420 },
-  { date: "2024-05-05", desktop: 481, mobile: 390 },
-  { date: "2024-05-06", desktop: 498, mobile: 520 },
-  { date: "2024-05-07", desktop: 388, mobile: 300 },
-  { date: "2024-05-08", desktop: 149, mobile: 210 },
-  { date: "2024-05-09", desktop: 227, mobile: 180 },
-  { date: "2024-05-10", desktop: 293, mobile: 330 },
-  { date: "2024-05-11", desktop: 335, mobile: 270 },
-  { date: "2024-05-12", desktop: 197, mobile: 240 },
-  { date: "2024-05-13", desktop: 197, mobile: 160 },
-  { date: "2024-05-14", desktop: 448, mobile: 490 },
-  { date: "2024-05-15", desktop: 473, mobile: 380 },
-  { date: "2024-05-16", desktop: 338, mobile: 400 },
-  { date: "2024-05-17", desktop: 499, mobile: 420 },
-  { date: "2024-05-18", desktop: 315, mobile: 350 },
-  { date: "2024-05-19", desktop: 235, mobile: 180 },
-  { date: "2024-05-20", desktop: 177, mobile: 230 },
-  { date: "2024-05-21", desktop: 82, mobile: 140 },
-  { date: "2024-05-22", desktop: 81, mobile: 120 },
-  { date: "2024-05-23", desktop: 252, mobile: 290 },
-  { date: "2024-05-24", desktop: 294, mobile: 220 },
-  { date: "2024-05-25", desktop: 201, mobile: 250 },
-  { date: "2024-05-26", desktop: 213, mobile: 170 },
-  { date: "2024-05-27", desktop: 420, mobile: 460 },
-  { date: "2024-05-28", desktop: 233, mobile: 190 },
-  { date: "2024-05-29", desktop: 78, mobile: 130 },
-  { date: "2024-05-30", desktop: 340, mobile: 280 },
-  { date: "2024-05-31", desktop: 178, mobile: 230 },
-  { date: "2024-06-01", desktop: 178, mobile: 200 },
-  { date: "2024-06-02", desktop: 470, mobile: 410 },
-  { date: "2024-06-03", desktop: 103, mobile: 160 },
-  { date: "2024-06-04", desktop: 439, mobile: 380 },
-  { date: "2024-06-05", desktop: 88, mobile: 140 },
-  { date: "2024-06-06", desktop: 294, mobile: 250 },
-  { date: "2024-06-07", desktop: 323, mobile: 370 },
-  { date: "2024-06-08", desktop: 385, mobile: 320 },
-  { date: "2024-06-09", desktop: 438, mobile: 480 },
-  { date: "2024-06-10", desktop: 155, mobile: 200 },
-  { date: "2024-06-11", desktop: 92, mobile: 150 },
-  { date: "2024-06-12", desktop: 492, mobile: 420 },
-  { date: "2024-06-13", desktop: 81, mobile: 130 },
-  { date: "2024-06-14", desktop: 426, mobile: 380 },
-  { date: "2024-06-15", desktop: 307, mobile: 350 },
-  { date: "2024-06-16", desktop: 371, mobile: 310 },
-  { date: "2024-06-17", desktop: 475, mobile: 520 },
-  { date: "2024-06-18", desktop: 107, mobile: 170 },
-  { date: "2024-06-19", desktop: 341, mobile: 290 },
-  { date: "2024-06-20", desktop: 408, mobile: 450 },
-  { date: "2024-06-21", desktop: 169, mobile: 210 },
-  { date: "2024-06-22", desktop: 317, mobile: 270 },
-  { date: "2024-06-23", desktop: 480, mobile: 530 },
-  { date: "2024-06-24", desktop: 132, mobile: 180 },
-  { date: "2024-06-25", desktop: 141, mobile: 190 },
-  { date: "2024-06-26", desktop: 434, mobile: 380 },
-  { date: "2024-06-27", desktop: 448, mobile: 490 },
-  { date: "2024-06-28", desktop: 149, mobile: 200 },
-  { date: "2024-06-29", desktop: 103, mobile: 160 },
+  // ... rest of chart data ...
   { date: "2024-06-30", desktop: 446, mobile: 400 },
 ];
+
+// Sample AI responses for the chat
+const sampleResponses = [
+  "Based on your spending patterns, you could save ₹5,000 more per month by reducing discretionary expenses.",
+  "Your investment portfolio is showing healthy growth. Consider increasing your SIP by ₹500 to maximize returns.",
+  "I notice your emergency fund is below the recommended 6-month expenses. Would you like me to suggest a savings plan?",
+  "Your mutual fund investments are performing well! The Growth Plus Equity Fund has given 12% returns in the last year.",
+  "Based on your financial goals, you're on track to reach your house down payment target by December 2025."
+];
+
+// Chat message component
+const ChatMessage = ({ message, isUser }) => (
+  <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-3`}>
+    <div className="flex items-start gap-2.5 max-w-[80%]">
+      {!isUser && (
+        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 flex-shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 8V4H8"></path>
+            <rect width="16" height="12" x="4" y="8" rx="2"></rect>
+            <path d="M2 14h2"></path>
+            <path d="M20 14h2"></path>
+            <path d="M15 13v2"></path>
+            <path d="M9 13v2"></path>
+          </svg>
+        </div>
+      )}
+      <div className={`p-3 rounded-lg ${isUser ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}>
+        <p className="text-sm">{message}</p>
+      </div>
+      {isUser && (
+        <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white flex-shrink-0">
+          <span className="text-xs font-medium">SG</span>
+        </div>
+      )}
+    </div>
+  </div>
+);
 
 const chartConfig = {
   visitors: {
@@ -160,6 +115,120 @@ const chartConfig = {
     label: "Expenses",
     color: "hsl(var(--chart-2))",
   },
+};
+
+// AI Chat Component
+const AIChatBox = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState([
+    { text: "Hi Sourabh! I'm your AI financial assistant. How can I help you today?", isUser: false }
+  ]);
+  const [input, setInput] = useState("");
+  const messagesEndRef = useRef(null);
+  
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+  
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isOpen]);
+  
+  const handleSendMessage = () => {
+    if (input.trim() === "") return;
+    
+    // Add user message
+    setMessages(prev => [...prev, { text: input, isUser: true }]);
+    setInput("");
+    
+    // Simulate AI response after a short delay
+    setTimeout(() => {
+      const randomResponse = sampleResponses[Math.floor(Math.random() * sampleResponses.length)];
+      setMessages(prev => [...prev, { text: randomResponse, isUser: false }]);
+    }, 1000);
+  };
+  
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      handleSendMessage();
+    }
+  };
+  
+  if (!isOpen) {
+    return (
+      <Button 
+        className="fixed bottom-6 right-6 rounded-full w-14 h-14 shadow-lg z-50 flex items-center justify-center"
+        onClick={() => setIsOpen(true)}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 8V4H8"></path>
+          <rect width="16" height="12" x="4" y="8" rx="2"></rect>
+          <path d="M2 14h2"></path>
+          <path d="M20 14h2"></path>
+          <path d="M15 13v2"></path>
+          <path d="M9 13v2"></path>
+        </svg>
+      </Button>
+    );
+  }
+  
+  return (
+    <Card className="fixed bottom-6 right-6 w-80 md:w-96 shadow-xl z-50 border border-gray-200">
+      <CardHeader className="p-4 pb-2 border-b">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 8V4H8"></path>
+                <rect width="16" height="12" x="4" y="8" rx="2"></rect>
+                <path d="M2 14h2"></path>
+                <path d="M20 14h2"></path>
+                <path d="M15 13v2"></path>
+                <path d="M9 13v2"></path>
+              </svg>
+            </div>
+            <div>
+              <CardTitle className="text-md">ArthSaathi AI</CardTitle>
+              <CardDescription className="text-xs">Financial Assistant</CardDescription>
+            </div>
+          </div>
+          <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} className="h-8 w-8">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 6 6 18"></path>
+              <path d="m6 6 12 12"></path>
+            </svg>
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent className="h-80 overflow-y-auto p-4 pt-3">
+        {messages.map((message, index) => (
+          <ChatMessage key={index} message={message.text} isUser={message.isUser} />
+        ))}
+        <div ref={messagesEndRef} />
+      </CardContent>
+      <CardFooter className="p-4 pt-2 border-t">
+        <div className="relative w-full flex items-center">
+          <Input
+            placeholder="Ask about your finances..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyPress={handleKeyPress}
+            className="pr-10 rounded-full"
+          />
+          <Button 
+            onClick={handleSendMessage} 
+            className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 rounded-full p-0"
+            disabled={input.trim() === ""}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m22 2-7 20-4-9-9-4Z"></path>
+              <path d="M22 2 11 13"></path>
+            </svg>
+          </Button>
+        </div>
+      </CardFooter>
+    </Card>
+  );
 };
 
 function Home() {
@@ -183,7 +252,6 @@ function Home() {
   return (
     <div className="m-4">
       {/* Greeting Section */}
-      {/* Greeting Section */}
       <div className="flex flex-col items-start gap-1">
         <p className="text-[24px] font-medium text-[#393939]">
           Hello Sourabh Ghosh!
@@ -192,6 +260,8 @@ function Home() {
           Every small step brings you closer to your big dreams.
         </p>
       </div>
+      
+      {/* Cards Section */}
       <div className="mt-4">
         <Box
           sx={{
@@ -365,6 +435,9 @@ function Home() {
           </Card>
         </div>
       </div>
+      
+      {/* AI Chatbox Component */}
+      <AIChatBox />
     </div>
   );
 }
