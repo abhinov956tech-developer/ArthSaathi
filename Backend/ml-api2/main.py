@@ -1,12 +1,13 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+import google.generativeai as genai
 import pandas as pd
 import joblib
 import numpy as np
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
-
+genai.configure(api_key="AIzaSyCcXsT36P3Uyxu-CCmG3VIXwFflPRUAU2A")
 # Enable CORS for cross-origin requests
 app.add_middleware(
     CORSMiddleware,
@@ -60,6 +61,22 @@ def preprocess_input(input_data):
     X = X.fillna(X.mean())  # Simple imputation
 
     return X
+
+@app.route('/chatbot', methods=['POST'])
+def chatbot():
+    user_input = request.get_json().get('message', '')
+    
+    if not user_input:
+        return jsonify({'response': "Please provide a message."})
+    
+    try:
+        model = genai.GenerativeModel("gemini-1.5-flash", system_instruction="You are a financial assistant. Provide helpful financial advice, budgeting tips, and investment guidance based on user queries.")
+        response = model.generate_content(user_input)
+        bot_reply = response.text
+    except Exception as e:
+        bot_reply = "Sorry, there was an error processing your request."
+    
+    return jsonify({'response': bot_reply})
 
 @app.post('/predict')
 def predict(input_data: InputData):
