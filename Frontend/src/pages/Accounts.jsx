@@ -246,11 +246,11 @@ const Accounts = () => {
                     <div className="grid grid-cols-2 gap-4 mb-4">
                       <div>
                         <p className="text-sm text-muted-foreground">Balance</p>
-                        <p className="text-2xl font-bold">${account.balance.toFixed(2)}</p>
+                        <p className="text-2xl font-bold">₹ {account.balance.toFixed(2)}</p>
                       </div>
                       <div>
                         <p className="text-sm text-muted-foreground">Income</p>
-                        <p className="text-lg font-medium">${account.income?.toFixed(2) || '0.00'}</p>
+                        <p className="text-lg font-medium">₹ {account.income?.toFixed(2) || '0.00'}</p>
                       </div>
                     </div>
 
@@ -265,13 +265,13 @@ const Accounts = () => {
                       </div>
                       <div>
                         <p className="text-xs text-muted-foreground">Desired Savings</p>
-                        <p className="text-sm font-medium">${account.desiredSavings?.toFixed(2) || '0.00'}</p>
+                        <p className="text-sm font-medium">₹ {account.desiredSavings?.toFixed(2) || '0.00'}</p>
                       </div>
                     </div>
 
                     <div className="mb-2">
                       <p className="text-xs text-muted-foreground">Disposable Income</p>
-                      <p className="text-sm font-medium">${account.disposableIncome?.toFixed(2) || '0.00'}</p>
+                      <p className="text-sm font-medium">₹ {account.disposableIncome?.toFixed(2) || '0.00'}</p>
                     </div>
 
                     {account.accountType === "family" && account.familyMembers && account.familyMembers.length > 0 && (
